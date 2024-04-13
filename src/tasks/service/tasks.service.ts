@@ -5,6 +5,7 @@ import { TaskStatusEnum } from '../enum/task-status.enum';
 import * as crypto from 'crypto';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { FilterTaskDto } from '../dto/filter-task.dto';
+import { UpdateTaskStatusDto } from '../dto/update-task-status.dto';
 
 @Injectable()
 export class TasksService {
@@ -58,8 +59,9 @@ export class TasksService {
 
   updateTaskStatus(
     id: string,
-    status: TaskStatusEnum,
+    updateTaskStatusDto: UpdateTaskStatusDto,
   ): Observable<TaskInterface> {
+    const { status } = updateTaskStatusDto;
     const foundTask$: Observable<TaskInterface> = this.getTaskById(id);
 
     return foundTask$.pipe(
@@ -78,8 +80,8 @@ export class TasksService {
   deleteTaskById(id: string): Observable<void> {
     const foundTask$: Observable<TaskInterface> = this.getTaskById(id);
     return foundTask$.pipe(
-      map(() => {
-        this._tasks = this._tasks.filter((task) => task.id !== id);
+      map((foundTask: TaskInterface) => {
+        this._tasks = this._tasks.filter((task) => task.id !== foundTask.id);
       }),
     );
   }

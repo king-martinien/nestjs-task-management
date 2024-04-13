@@ -14,8 +14,8 @@ import { TasksService } from '../service/tasks.service';
 import { Observable } from 'rxjs';
 import { TaskInterface } from '../interface/task.interface';
 import { CreateTaskDto } from '../dto/create-task.dto';
-import { TaskStatusEnum } from '../enum/task-status.enum';
 import { FilterTaskDto } from '../dto/filter-task.dto';
+import { UpdateTaskStatusDto } from '../dto/update-task-status.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -44,9 +44,9 @@ export class TasksController {
   @Patch(':id/status')
   updateTaskStatus(
     @Param('id') id: string,
-    @Body('status') status: TaskStatusEnum,
+    @Body() updateTaskStatusDto: UpdateTaskStatusDto,
   ): Observable<TaskInterface> {
-    return this._tasksService.updateTaskStatus(id, status);
+    return this._tasksService.updateTaskStatus(id, updateTaskStatusDto);
   }
 
   @Delete(':id')
