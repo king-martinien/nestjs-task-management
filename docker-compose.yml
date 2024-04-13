@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres
+    container_name: postgres-nest
+    restart: always
+    environment:
+      - POSTGRES_USER=king-martinien
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'

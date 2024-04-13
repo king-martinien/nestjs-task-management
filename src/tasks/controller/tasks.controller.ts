@@ -12,17 +12,17 @@ import {
 } from '@nestjs/common';
 import { TasksService } from '../service/tasks.service';
 import { Observable } from 'rxjs';
-import { TaskInterface } from '../interface/task.interface';
+import { TaskEntity } from '../entity/task.entity';
 import { CreateTaskDto } from '../dto/create-task.dto';
-import { FilterTaskDto } from '../dto/filter-task.dto';
 import { UpdateTaskStatusDto } from '../dto/update-task-status.dto';
+import { FilterTaskDto } from '../dto/filter-task.dto';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly _tasksService: TasksService) {}
 
   @Get()
-  getTasks(@Query() filterTaskDto: FilterTaskDto): Observable<TaskInterface[]> {
+  getTasks(@Query() filterTaskDto: FilterTaskDto): Observable<TaskEntity[]> {
     if (Object.keys(filterTaskDto).length) {
       return this._tasksService.getTasksWithFilters(filterTaskDto);
     } else {
@@ -31,13 +31,13 @@ export class TasksController {
   }
 
   @Get(':id')
-  getTaskById(@Param('id') id: string): Observable<TaskInterface> {
+  getTaskById(@Param('id') id: string): Observable<TaskEntity> {
     return this._tasksService.getTaskById(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createTask(@Body() createTaskDto: CreateTaskDto): Observable<TaskInterface> {
+  createTask(@Body() createTaskDto: CreateTaskDto): Observable<TaskEntity> {
     return this._tasksService.createTask(createTaskDto);
   }
 
@@ -45,7 +45,7 @@ export class TasksController {
   updateTaskStatus(
     @Param('id') id: string,
     @Body() updateTaskStatusDto: UpdateTaskStatusDto,
-  ): Observable<TaskInterface> {
+  ): Observable<TaskEntity> {
     return this._tasksService.updateTaskStatus(id, updateTaskStatusDto);
   }
 
