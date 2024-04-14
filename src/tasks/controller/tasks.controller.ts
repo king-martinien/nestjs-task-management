@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Patch,
   Post,
@@ -24,6 +25,8 @@ import { UserEntity } from '../../auth/entity/user.entity';
 @Controller('tasks')
 @UseGuards(JwtGuard)
 export class TasksController {
+  private _logger = new Logger(TasksController.name);
+
   constructor(private readonly _tasksService: TasksService) {}
 
   @Get()
@@ -31,6 +34,9 @@ export class TasksController {
     @Query() filterTaskDto: FilterTaskDto,
     @GetUserDecorator() user: UserEntity,
   ): Observable<TaskEntity[]> {
+    this._logger.verbose(
+      `User ${user.username} retrieving all tasks with Filter ${JSON.stringify(filterTaskDto)}`,
+    );
     return this._tasksService.getTasks(filterTaskDto, user);
   }
 
@@ -48,6 +54,9 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
     @GetUserDecorator() user: UserEntity,
   ): Observable<TaskEntity> {
+    this._logger.verbose(
+      `User ${user.username} creating a new Task. Payload : ${JSON.stringify(createTaskDto)}`,
+    );
     return this._tasksService.createTask(createTaskDto, user);
   }
 

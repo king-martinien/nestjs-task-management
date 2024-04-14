@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { TasksRepository } from '../repository/tasks.repository';
-import { from, map, Observable, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import { TaskEntity } from '../entity/task.entity';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskStatusDto } from '../dto/update-task-status.dto';
@@ -9,13 +14,23 @@ import { UserEntity } from '../../auth/entity/user.entity';
 
 @Injectable()
 export class TasksService {
+  private readonly _logger = new Logger(TasksService.name, { timestamp: true });
+
   constructor(private readonly _tasksRepository: TasksRepository) {}
 
   getTasks(
     filterTaskDto: FilterTaskDto,
     user: UserEntity,
   ): Observable<TaskEntity[]> {
-    return from(this._tasksRepository.filterTasks(filterTaskDto, user));
+    return from(this._tasksRepository.filterTasks(filterTaskDto, user)).pipe(
+      catchError((err) => {
+        this._logger.error(
+          `Failed to retrieve tasks for user ${user.username}. Filter ${JSON.stringify(filterTaskDto)}`,
+          err.stack,
+        );
+        throw new InternalServerErrorException();
+      }),
+    );
   }
 
   getTaskById(id: string, user: UserEntity): Observable<TaskEntity> {
