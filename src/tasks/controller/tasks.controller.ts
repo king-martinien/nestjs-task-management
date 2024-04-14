@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { TasksService } from '../service/tasks.service';
 import { Observable } from 'rxjs';
@@ -16,8 +17,10 @@ import { TaskEntity } from '../entity/task.entity';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskStatusDto } from '../dto/update-task-status.dto';
 import { FilterTaskDto } from '../dto/filter-task.dto';
+import { JwtGuard } from '../../auth/guard/jwt.guard';
 
 @Controller('tasks')
+@UseGuards(JwtGuard)
 export class TasksController {
   constructor(private readonly _tasksService: TasksService) {}
 
