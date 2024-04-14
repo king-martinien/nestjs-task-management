@@ -1,7 +1,6 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayloadInterface } from '../interface/jwt-payload.interface';
-import { from, map } from 'rxjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entity/user.entity';
 import { Repository } from 'typeorm';
@@ -18,17 +17,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: JwtPayloadInterface) {
+  async validate(payload: JwtPayloadInterface) {
     const { username } = payload;
-    const foundUser$ = from(this._userRepository.findOneBy({ username }));
-
-    return foundUser$.pipe(
-      map((foundUser) => {
-        if (!foundUser) {
-          throw new UnauthorizedException();
-        }
-        return foundUser;
-      }),
-    );
+    const foundUser = await this._userRepository.findOneBy({ username });
+    if (!foundUser) {
+      throw new UnauthorizedException();
+    }
+    return foundUser;
   }
 }

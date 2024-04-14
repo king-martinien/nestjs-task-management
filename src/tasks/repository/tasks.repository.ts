@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { TaskEntity } from '../entity/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FilterTaskDto } from '../dto/filter-task.dto';
+import { UserEntity } from '../../auth/entity/user.entity';
 
 export class TasksRepository extends Repository<TaskEntity> {
   constructor(
@@ -15,9 +16,12 @@ export class TasksRepository extends Repository<TaskEntity> {
     );
   }
 
-  async filterTasks(filterTaskDto: FilterTaskDto): Promise<TaskEntity[]> {
+  async filterTasks(
+    filterTaskDto: FilterTaskDto,
+    user: UserEntity,
+  ): Promise<TaskEntity[]> {
     const { search, status } = filterTaskDto;
-    const tasksQuery = this.createQueryBuilder('Task');
+    const tasksQuery = this.createQueryBuilder('Task').where({ user });
 
     if (search) {
       tasksQuery.andWhere(

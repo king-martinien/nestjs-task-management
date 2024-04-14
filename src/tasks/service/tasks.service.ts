@@ -5,21 +5,21 @@ import { TaskEntity } from '../entity/task.entity';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskStatusDto } from '../dto/update-task-status.dto';
 import { FilterTaskDto } from '../dto/filter-task.dto';
+import { UserEntity } from '../../auth/entity/user.entity';
 
 @Injectable()
 export class TasksService {
   constructor(private readonly _tasksRepository: TasksRepository) {}
 
-  getAllTasks(): Observable<TaskEntity[]> {
-    return from(this._tasksRepository.find());
+  getTasks(
+    filterTaskDto: FilterTaskDto,
+    user: UserEntity,
+  ): Observable<TaskEntity[]> {
+    return from(this._tasksRepository.filterTasks(filterTaskDto, user));
   }
 
-  getTasksWithFilters(filterTaskDto: FilterTaskDto): Observable<TaskEntity[]> {
-    return from(this._tasksRepository.filterTasks(filterTaskDto));
-  }
-
-  getTaskById(id: string): Observable<TaskEntity> {
-    const foundTask$ = from(this._tasksRepository.findOneBy({ id }));
+  getTaskById(id: string, user: UserEntity): Observable<TaskEntity> {
+    const foundTask$ = from(this._tasksRepository.findOneBy({ id, user }));
     return foundTask$.pipe(
       map((foundTask: TaskEntity | null) => {
         if (!foundTask) {
@@ -30,34 +30,39 @@ export class TasksService {
     );
   }
 
-  createTask(createTaskDto: CreateTaskDto): Observable<TaskEntity> {
+  createTask(
+    createTaskDto: CreateTaskDto,
+    user: UserEntity,
+  ): Observable<TaskEntity> {
     const { title, description } = createTaskDto;
     const newTask: TaskEntity = this._tasksRepository.create({
       title,
       description,
+      user,
     });
     return from(this._tasksRepository.save(newTask));
-  }
-
-  deleteTaskById(id: string): Observable<void> {
-    const foundTask$: Observable<TaskEntity> = this.getTaskById(id);
-    return foundTask$.pipe(
-      map((foundTask: TaskEntity) => {
-        from(this._tasksRepository.remove(foundTask));
-      }),
-    );
   }
 
   updateTaskStatus(
     id: string,
     updateTaskStatusDto: UpdateTaskStatusDto,
+    user: UserEntity,
   ): Observable<TaskEntity> {
     const { status } = updateTaskStatusDto;
-    const foundTask$: Observable<TaskEntity> = this.getTaskById(id);
+    const foundTask$: Observable<TaskEntity> = this.getTaskById(id, user);
     return foundTask$.pipe(
       switchMap((foundTask: TaskEntity) => {
         foundTask.status = status;
         return this._tasksRepository.save(foundTask);
+      }),
+    );
+  }
+
+  deleteTaskById(id: string, user: UserEntity): Observable<void> {
+    const foundTask$: Observable<TaskEntity> = this.getTaskById(id, user);
+    return foundTask$.pipe(
+      map((foundTask: TaskEntity) => {
+        from(this._tasksRepository.remove(foundTask));
       }),
     );
   }
